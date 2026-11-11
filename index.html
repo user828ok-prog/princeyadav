@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wake Up Pro</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #090e1b;
+    color: white;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 950px;
+    margin: auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: bold;
+    color: #55d6ff;
+}
+
+.status {
+    background: #14283a;
+    color: #55d6ff;
+    padding: 9px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+.clock-card {
+    background: linear-gradient(135deg, #172c4c, #182044);
+    border: 1px solid #30466b;
+    border-radius: 22px;
+    padding: 35px 20px;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.clock {
+    font-size: clamp(45px, 10vw, 75px);
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+
+.date {
+    color: #aabbd5;
+    margin-top: 10px;
+}
+
+.section {
+    background: #121b2d;
+    border: 1px solid #273750;
+    padding: 24px;
+    border-radius: 18px;
+    margin-bottom: 22px;
+}
+
+h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    color: #b9c7dd;
+    margin: 14px 0 8px;
+    font-size: 14px;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 13px;
+    background: #0b1425;
+    border: 1px solid #344764;
+    border-radius: 10px;
+    color: white;
+    outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #42c8ff;
+}
+
+button {
+    padding: 13px 18px;
+    border: none;
+    border-radius: 10px;
+    background: #16a9e0;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+button:hover {
+    background: #0786ba;
+}
+
+button.danger {
+    background: #d94355;
+}
+
+button.secondary {
+    background: #34445f;
+}
+
+button.success {
+    background: #159b70;
+}
+
+.buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.alarm-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    background: #0b1425;
+    border: 1px solid #293b56;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 12px;
+}
+
+.alarm-time {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.small {
+    font-size: 12px;
+    color: #9eacc2;
+    margin-top: 5px;
+}
+
+.range-value {
+    color: #55d6ff;
+    float: right;
+}
+
+#ringScreen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(145deg, #101c36, #07101f);
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 25px;
+}
+
+.ring-content {
+    max-width: 450px;
+    width: 100%;
+}
+
+.ring-content h1 {
+    font-size: 38px;
+    color: #55d6ff;
+    margin-bottom: 20px;
+}
+
+.ring-time {
+    font-size: 65px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.dismiss {
+    background: #e34455;
+    font-size: 18px;
+    padding: 18px 45px;
+    margin-top: 30px;
+}
+
+footer {
+    text-align: center;
+    color: #71839e;
+    padding: 20px;
+    font-size: 12px;
+}
+
+@media(max-width: 600px) {
+    body { padding: 12px; }
+    .section { padding: 18px; }
+    .alarm-item { align-items: flex-start; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <div class="logo">WAKE UP PRO</div>
+    <div class="status">● ALARM SYSTEM</div>
+</header>
+
+<div class="clock-card">
+    <div class="clock" id="clock">00:00:00</div>
+    <div class="date" id="date"></div>
+</div>
+
+<div class="section">
+    <h2>＋ Create New Alarm</h2>
+
+    <label>Alarm Name</label>
+    <input type="text" id="alarmName" placeholder="Morning Wake Up">
+
+    <label>Alarm Time</label>
+    <input type="time" id="alarmTime">
+
+    <label>Repeat</label>
+    <select id="repeat">
+        <option value="daily">Every Day</option>
+        <option value="once">Once</option>
+    </select>
+
+    <button onclick="addAlarm()">SAVE ALARM</button>
+</div>
+
+<div class="section">
+    <h2>◷ Your Alarms</h2>
+    <div id="alarmList">No alarms added yet.</div>
+</div>
+
+<div class="section">
+    <h2>🔊 Voice Settings</h2>
+
+    <label>Available Voice</label>
+    <select id="voiceSelect"></select>
+
+    <label>
+        Voice Pitch
+        <span class="range-value" id="pitchValue">0.7</span>
+    </label>
+    <input type="range" id="pitch" min="0.5" max="1.5" step="0.1" value="0.7">
+
+    <label>
+        Speaking Speed
+        <span class="range-value" id="speedValue">0.85</span>
+    </label>
+    <input type="range" id="speed" min="0.5" max="1.5" step="0.05" value="0.85">
+
+    <label>Announcement Message</label>
+    <textarea id="message" rows="3">Wake up! It is time to get up. Do not waste your valuable time. Start your day now!</textarea>
+
+    <div class="buttons">
+        <button onclick="testVoice()" class="success">TEST VOICE</button>
+        <button onclick="stopVoice()" class="secondary">STOP VOICE</button>
+    </div>
+</div>
+
+<div class="section">
+    <h2>📚 Study Reminder</h2>
+
+    <label>Study Task</label>
+    <input type="text" id="task" placeholder="Complete computer homework">
+
+    <button onclick="addTask()">ADD TASK</button>
+
+    <div id="taskList"></div>
+</div>
+
+<footer>WAKE UP PRO • Stay Focused • Stay Productive</footer>
+
+</div>
+
+<div id="ringScreen">
+    <div class="ring-content">
+        <h1>WAKE UP!</h1>
+        <p>Your alarm is ringing</p>
+        <div class="ring-time" id="ringTime">00:00</div>
+        <p id="ringName">Morning Alarm</p>
+        <p style="color:#aabbd5;margin-top:20px">
+            Voice reminders will continue until dismissed.
+        </p>
+        <button class="dismiss" onclick="dismissAlarm()">DISMISS ALARM</button>
+    </div>
+</div>
+
+<script>
+let alarms = JSON.parse(localStorage.getItem("wakeAlarms") || "[]");
+let tasks = JSON.parse(localStorage.getItem("wakeTasks") || "[]");
+let ringing = false;
+let ringingAlarm = null;
+let voiceTimer = null;
+let firedToday = {};
+
+function updateClock() {
+    let now = new Date();
+
+    document.getElementById("clock").textContent =
+        now.toLocaleTimeString();
+
+    document.getElementById("date").textContent =
+        now.toDateString();
+
+    checkAlarms();
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+function saveAlarms() {
+    localStorage.setItem("wakeAlarms", JSON.stringify(alarms));
+}
+
+function addAlarm() {
+    let name = document.getElementById("alarmName").value.trim();
+    let time = document.getElementById("alarmTime").value;
+    let repeat = document.getElementById("repeat").value;
+
+    if (!time) {
+        alert("Please select an alarm time.");
+        return;
+    }
+
+    alarms.push({
+        id: Date.now(),
+        name: name || "Wake Up Alarm",
+        time: time,
+        repeat: repeat,
+        enabled: true,
+        created: new Date().toDateString()
+    });
+
+    saveAlarms();
+    renderAlarms();
+
+    document.getElementById("alarmName").value = "";
+    alert("Alarm saved successfully!");
+}
+
+function renderAlarms() {
+    let list = document.getElementById("alarmList");
+    list.innerHTML = "";
+
+    if (alarms.length === 0) {
+        list.textContent = "No alarms added yet.";
+        return;
+    }
+
+    alarms.forEach(alarm => {
+        let item = document.createElement("div");
+        item.className = "alarm-item";
+
+        let info = document.createElement("div");
+
+        let time = document.createElement("div");
+        time.className = "alarm-time";
+        time.textContent = alarm.time;
+
+        let name = document.createElement("div");
+        name.textContent = alarm.name;
+
+        let detail = document.createElement("div");
+        detail.className = "small";
+        detail.textContent =
+            alarm.repeat === "daily" ? "Every day" : "One time";
+
+        info.append(time, name, detail);
+
+        let controls = document.createElement("div");
+
+        let toggle = document.createElement("input");
+        toggle.type = "checkbox";
+        toggle.checked = alarm.enabled;
+        toggle.style.width = "auto";
+        toggle.addEventListener("change", () => {
+            alarm.enabled = toggle.checked;
+            saveAlarms();
+        });
+
+        let remove = document.createElement("button");
+        remove.className = "danger";
+        remove.textContent = "DELETE";
+        remove.style.marginLeft = "8px";
+        remove.onclick = () => {
+            alarms = alarms.filter(a => a.id !== alarm.id);
+            saveAlarms();
+            renderAlarms();
+        };
+
+        controls.append(toggle, remove);
+        item.append(info, controls);
+        list.appendChild(item);
+    });
+}
+
+function checkAlarms() {
+    if (ringing) return;
+
+    let now = new Date();
+    let currentTime =
+        String(now.getHours()).padStart(2, "0") + ":" +
+        String(now.getMinutes()).padStart(2, "0");
+
+    let today = now.toDateString();
+
+    alarms.forEach(alarm => {
+        if (!alarm.enabled || alarm.time !== currentTime) return;
+
+        let key = alarm.id + "-" + today;
+
+        if (firedToday[key]) return;
+
+        if (alarm.repeat === "once" && alarm.created !== today) return;
+
+        firedToday[key] = true;
+
+        if (alarm.repeat === "once") {
+            alarm.enabled = false;
+            saveAlarms();
+            renderAlarms();
+        }
+
+        startAlarm(alarm);
+    });
+}
+
+function startAlarm(alarm) {
+    ringing = true;
+    ringingAlarm = alarm;
+
+    document.getElementById("ringScreen").style.display = "flex";
+    document.getElementById("ringTime").textContent = alarm.time;
+    document.getElementById("ringName").textContent = alarm.name;
+
+    speakRepeatedly();
+    voiceTimer = setInterval(speakRepeatedly, 12000);
+
+    if (navigator.vibrate) {
+        navigator.vibrate([1000, 500, 1000, 500]);
+    }
+}
+
+function speakRepeatedly() {
+    if (!ringing) return;
+
+    speechSynthesis.cancel();
+
+    let text = document.getElementById("message").value;
+
+    let speech = new SpeechSynthesisUtterance(text);
+
+    let voices = speechSynthesis.getVoices();
+    let selected = document.getElementById("voiceSelect").value;
+
+    speech.voice = voices.find(v => v.name === selected) || null;
+    speech.pitch = Number(document.getElementById("pitch").value);
+    speech.rate = Number(document.getElementById("speed").value);
+    speech.volume = 1;
+
+    speechSynthesis.speak(speech);
+}
+
+function dismissAlarm() {
+    ringing = false;
+    ringingAlarm = null;
+
+    clearInterval(voiceTimer);
+    speechSynthesis.cancel();
+
+    if (navigator.vibrate) navigator.vibrate(0);
+
+    document.getElementById("ringScreen").style.display = "none";
+}
+
+function loadVoices() {
+    let voices = speechSynthesis.getVoices();
+    let select = document.getElementById("voiceSelect");
+
+    select.innerHTML = "";
+
+    voices.forEach(voice => {
+        let option = document.createElement("option");
+        option.value = voice.name;
+        option.textContent = voice.name + " (" + voice.lang + ")";
+        select.appendChild(option);
+    });
+}
+
+speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+function testVoice() {
+    speechSynthesis.cancel();
+
+    let speech = new SpeechSynthesisUtterance(
+        document.getElementById("message").value
+    );
+
+    let voices = speechSynthesis.getVoices();
+    let selected = document.getElementById("voiceSelect").value;
+
+    speech.voice = voices.find(v => v.name === selected) || null;
+    speech.pitch = Number(document.getElementById("pitch").value);
+    speech.rate = Number(document.getElementById("speed").value);
+
+    speechSynthesis.speak(speech);
+}
+
+function stopVoice() {
+    speechSynthesis.cancel();
+}
+
+document.getElementById("pitch").oninput = function() {
+    document.getElementById("pitchValue").textContent = this.value;
+};
+
+document.getElementById("speed").oninput = function() {
+    document.getElementById("speedValue").textContent = this.value;
+};
+
+function addTask() {
+    let value = document.getElementById("task").value.trim();
+
+    if (!value) return;
+
+    tasks.push({
+        id: Date.now(),
+        text: value,
+        done: false
+    });
+
+    localStorage.setItem("wakeTasks", JSON.stringify(tasks));
+    document.getElementById("task").value = "";
+    renderTasks();
+}
+
+function renderTasks() {
+    let list = document.getElementById("taskList");
+    list.innerHTML = "";
+
+    tasks.forEach(task => {
+        let item = document.createElement("div");
+        item.className = "alarm-item";
+
+        let label = document.createElement("span");
+        label.textContent = task.text;
+        if (task.done) label.style.textDecoration = "line-through";
+
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.done;
+        checkbox.style.width = "auto";
+
+        checkbox.onchange = () => {
+            task.done = checkbox.checked;
+            localStorage.setItem("wakeTasks", JSON.stringify(tasks));
+            renderTasks();
+        };
+
+        item.append(label, checkbox);
+        list.appendChild(item);
+    });
+}
+
+renderAlarms();
+renderTasks();
+</script>
+
+</body>
+</html>
